@@ -2,7 +2,7 @@ site_name: NOMAD Gallery
 site_description: A mkdocs-based GitHub Pages site for showcasing NOMAD features, examples, and use cases.
 site_author: Berfin Güne, Haoyu Yang, Joseph Rudzinski, Ahmed E. Mansour
 
-repo_url: https://github.com/FAIRmat-NFDI/nomad-gallery
+repo_url: https://github.com/ahm531/nomad-gallery-testing
 edit_uri: ""
 
 nav:
