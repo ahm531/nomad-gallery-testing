@@ -451,7 +451,48 @@ def _render_grid_use_case_card(file_path, index=0):
         }
         right_column = _build_right_column(info, escaped_vals)
 
-        return f'''
+        _share_icon = (
+        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"'
+        ' stroke-width="2" aria-hidden="true">'
+        '<circle cx="18" cy="5" r="3"/>'
+        '<circle cx="6" cy="12" r="3"/>'
+        '<circle cx="18" cy="19" r="3"/>'
+        '<line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/>'
+        '<line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>'
+        '</svg>'
+    )
+    _li_path = (
+        "M20.447 20.452H17.21v-5.569c0-1.327-.027-3.037-1.852-3.037"
+        "-1.854 0-2.137 1.446-2.137 2.94v5.666H9.985V9h3.105v1.561h"
+        ".044c.432-.82 1.489-1.684 3.065-1.684 3.278 0 3.883 2.157 3"
+        ".883 4.961v6.614zM5.337 7.433a1.8 1.8 0 1 1 0-3.601 1.8 1.8"
+        " 0 0 1 0 3.601zM6.928 20.452H3.744V9h3.184v11.452zM22.225 0"
+        "H1.771C.792 0 0 .774 0 1.729v20.542C0 23.226.792 24 1.771 24"
+        "h20.451C23.2 24 24 23.226 24 22.271V1.729C24 .774 23.2 0"
+        " 22.222 0h.003z"
+    )
+    _li_icon = (
+        '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">'
+        f'<path d="{_li_path}"/>'
+        '</svg>'
+    )
+    _email_icon = (
+        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"'
+        ' stroke-width="2" aria-hidden="true">'
+        '<rect x="2" y="4" width="20" height="16" rx="2"/>'
+        '<polyline points="2,4 12,13 22,4"/>'
+        '</svg>'
+    )
+    _copy_icon = (
+        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"'
+        ' stroke-width="2" aria-hidden="true">'
+        '<rect x="9" y="9" width="13" height="13" rx="2"/>'
+        '<path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9'
+        'a2 2 0 0 1 2 2v1"/>'
+        '</svg>'
+    )
+
+    return f'''
 <article class="grid-use-case-card gallery-card"
   id="grid-card-{slug}"
   data-submission-date="{submission_date}"
@@ -511,23 +552,29 @@ def _render_grid_use_case_card(file_path, index=0):
         <button class="grid-use-case-card__share-btn" type="button"
           data-card-id="grid-card-{slug}"
           data-card-title="{title}"
-          aria-haspopup="true" aria-expanded="false" title="Share this card">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+          aria-haspopup="true" aria-expanded="false"
+          title="Share this card">
+          {_share_icon}
         </button>
         <div class="grid-use-case-card__share-popover" role="menu" hidden>
-          <a class="share-popover__item share-popover__item--linkedin" href="#" target="_blank" rel="noopener" role="menuitem">
-            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20.447 20.452H17.21v-5.569c0-1.327-.027-3.037-1.852-3.037-1.854 0-2.137 1.446-2.137 2.94v5.666H9.985V9h3.105v1.561h.044c.432-.82 1.489-1.684 3.065-1.684 3.278 0 3.883 2.157 3.883 4.961v6.614zM5.337 7.433a1.8 1.8 0 1 1 0-3.601 1.8 1.8 0 0 1 0 3.601zM6.928 20.452H3.744V9h3.184v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.226.792 24 1.771 24h20.451C23.2 24 24 23.226 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+          <a class="share-popover__item share-popover__item--linkedin"
+            href="#" target="_blank" rel="noopener" role="menuitem">
+            {_li_icon}
             <span class="share-popover__linkedin-text">
               LinkedIn
-              <span class="share-popover__linkedin-hint">Post text will be copied</span>
+              <span class="share-popover__linkedin-hint">
+                Post text will be copied
+              </span>
             </span>
           </a>
-          <a class="share-popover__item share-popover__item--email" href="#" role="menuitem">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="2"/><polyline points="2,4 12,13 22,4"/></svg>
+          <a class="share-popover__item share-popover__item--email"
+            href="#" role="menuitem">
+            {_email_icon}
             Email
           </a>
-          <button class="share-popover__item share-popover__item--copy" type="button" role="menuitem">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+          <button class="share-popover__item share-popover__item--copy"
+            type="button" role="menuitem">
+            {_copy_icon}
             <span class="share-popover__copy-label">Copy link</span>
           </button>
         </div>
