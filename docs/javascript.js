@@ -560,17 +560,30 @@
   function openCardFromHash() {
     const hash = window.location.hash.slice(1);
     if (!hash) return;
-    const card = document.getElementById(hash);
-    if (!card || !card.classList.contains("grid-use-case-card")) return;
 
-    // Small delay to allow layout to settle after MkDocs renders
-    setTimeout(() => {
-      if (!card.classList.contains("is-expanded")) {
-        const toggleBtn = card.querySelector(".grid-use-case-card__toggle");
-        if (toggleBtn) toggleBtn.click();
+    function tryExpand(attemptsLeft) {
+      const card = document.getElementById(hash);
+      if (!card || !card.classList.contains("grid-use-case-card")) return;
+
+      // Ensure the toggle listener has been attached by initGridUseCaseCards
+      const toggleBtn = card.querySelector(".grid-use-case-card__toggle");
+      if (!toggleBtn && attemptsLeft > 0) {
+        setTimeout(() => tryExpand(attemptsLeft - 1), 100);
+        return;
       }
-      card.scrollIntoView({ behavior: "smooth", block: "start" });
-    }, 300);
+
+      if (!card.classList.contains("is-expanded") && toggleBtn) {
+        toggleBtn.click();
+      }
+
+      // Wait a frame for the expand animation to start before scrolling
+      requestAnimationFrame(() => {
+        card.scrollIntoView({ behavior: "smooth", block: "start" });
+      });
+    }
+
+    // Start trying after a short delay to let the page render
+    setTimeout(() => tryExpand(10), 200);
   }
 
   // ── Share popover logic ──
