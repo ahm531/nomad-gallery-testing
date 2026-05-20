@@ -503,11 +503,17 @@
           card._origNextSibling = null;
         }
 
-        // Scroll the top of the card to the top of the viewport
+        // Update URL hash and scroll when expanded
         if (expanded) {
+          const cardId = card.id;
+          if (cardId) {
+            history.replaceState(null, "", `#${cardId}`);
+          }
           requestAnimationFrame(() => {
             card.scrollIntoView({ behavior: "smooth", block: "start" });
           });
+        } else {
+          history.replaceState(null, "", window.location.pathname);
         }
 
         const label = button.querySelector(".grid-use-case-card__toggle-label");
@@ -537,12 +543,147 @@
   if (typeof window.document$ !== "undefined" && window.document$?.subscribe) {
     window.document$.subscribe(() => {
       initGridUseCaseCards();
+      openCardFromHash();
     });
   }
 
   if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", initGridUseCaseCards);
+    document.addEventListener("DOMContentLoaded", () => {
+      initGridUseCaseCards();
+      openCardFromHash();
+    });
   } else {
     initGridUseCaseCards();
+    openCardFromHash();
   }
+
+  function openCardFromHash() {
+    const hash = window.location.hash.slice(1);
+    if (!hash) return;
+    const card = document.getElementById(hash);
+    if (!card || !card.classList.contains("grid-use-case-card")) return;
+
+    // Small delay to allow layout to settle after MkDocs renders
+    setTimeout(() => {
+      if (!card.classList.contains("is-expanded")) {
+        const toggleBtn = card.querySelector(".grid-use-case-card__toggle");
+        if (toggleBtn) toggleBtn.click();
+      }
+      card.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 300);
+  }
+
+  // ── Share popover logic ──
+  document.addEventListener("click", (e) => {
+    // Toggle popover open/close
+    const shareBtn = e.target.closest(".grid-use-case-card__share-btn");
+    if (shareBtn) {
+      e.stopPropagation();
+      const wrap = shareBtn.closest(".grid-use-case-card__share-wrap");
+      const popover = wrap.querySelector(".grid-use-case-card__share-popover");
+      const isOpen = !popover.hidden;
+
+      // Close all other open popovers first
+      document.querySelectorAll(".grid-use-case-card__share-popover").forEach((p) => {
+        p.hidden = true;
+        p.closest(".grid-use-case-card__share-wrap")
+          ?.querySelector(".grid-use-case-card__share-btn")
+          ?.setAttribute("aria-expanded", "false");
+      });
+
+      if (!isOpen) {
+        const cardId = shareBtn.dataset.cardId;
+        const cardTitle = shareBtn.dataset.cardTitle || "Check out this NOMAD Gallery entry";
+        const url = `${window.location.origin}${window.location.pathname}#${cardId}`;
+        const encodedUrl = encodeURIComponent(url);
+        const encodedTitle = encodeURIComponent(cardTitle);
+
+        // Build share URLs
+        const linkedInLink = wrap.querySelector(".share-popover__item--linkedin");
+        const emailLink = wrap.querySelector(".share-popover__item--email");
+
+        // LinkedIn can't pre-fill post text (platform restriction).
+        // Instead: clicking LinkedIn auto-copies a ready-made post to clipboard,
+        // then opens LinkedIn so the user just pastes (Ctrl+V).
+        const postText = `🔬 Check out this use case on the NOMAD Gallery: "${shareBtn.dataset.cardTitle || "NOMAD Gallery"}"
+
+Explore materials science data, tools, and workflows shared by the community 👉 @FAIRmat-NFDI
+
+🔗 ${url}
+
+#NOMAD #MaterialsScience #OpenData #FAIRdata`;
+
+        const emailText = `🔬 Check out this use case on the NOMAD Gallery: "${shareBtn.dataset.cardTitle || "NOMAD Gallery"}"
+
+Explore materials science data, tools, and workflows shared by the community.
+
+🔗 ${url}
+
+#NOMAD #MaterialsScience #OpenData #FAIRdata`;
+
+        if (linkedInLink) {
+          linkedInLink.href = `https://www.linkedin.com/sharing/share-offsite/?url=${encodedUrl}`;
+
+          // Remove old listener if re-opening
+          if (linkedInLink._shareHandler) {
+            linkedInLink.removeEventListener("click", linkedInLink._shareHandler);
+          }
+          linkedInLink._shareHandler = (ev) => {
+            ev.preventDefault();
+            navigator.clipboard.writeText(postText).then(() => {
+              const label = linkedInLink.querySelector(".share-popover__linkedin-hint");
+              if (label) {
+                label.textContent = "✓ Post text copied! Paste in LinkedIn.";
+                label.style.display = "block";
+              }
+              setTimeout(() => {
+                window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${encodedUrl}`, "_blank", "noopener");
+                if (label) { label.style.display = "none"; label.textContent = "Post text will be copied"; }
+              }, 800);
+            });
+          };
+          linkedInLink.addEventListener("click", linkedInLink._shareHandler);
+        }
+        if (emailLink) {
+          const emailBody = encodeURIComponent(emailText);
+          emailLink.href = `mailto:?subject=${encodedTitle}&body=${emailBody}`;
+        }
+
+        popover.hidden = false;
+        shareBtn.setAttribute("aria-expanded", "true");
+      }
+      return;
+    }
+
+    // Copy link button inside popover
+    const copyBtn = e.target.closest(".share-popover__item--copy");
+    if (copyBtn) {
+      e.stopPropagation();
+      const wrap = copyBtn.closest(".grid-use-case-card__share-wrap");
+      const shareBtn2 = wrap.querySelector(".grid-use-case-card__share-btn");
+      const cardId = shareBtn2?.dataset.cardId;
+      const url = `${window.location.origin}${window.location.pathname}#${cardId}`;
+
+      navigator.clipboard.writeText(url).then(() => {
+        const label = copyBtn.querySelector(".share-popover__copy-label");
+        label.textContent = "Copied!";
+        copyBtn.classList.add("is-copied");
+        setTimeout(() => {
+          label.textContent = "Copy link";
+          copyBtn.classList.remove("is-copied");
+        }, 2000);
+      });
+      return;
+    }
+
+    // Close popover when clicking outside
+    if (!e.target.closest(".grid-use-case-card__share-wrap")) {
+      document.querySelectorAll(".grid-use-case-card__share-popover").forEach((p) => {
+        p.hidden = true;
+        p.closest(".grid-use-case-card__share-wrap")
+          ?.querySelector(".grid-use-case-card__share-btn")
+          ?.setAttribute("aria-expanded", "false");
+      });
+    }
+  });
 })();
