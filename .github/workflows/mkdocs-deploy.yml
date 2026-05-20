@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main # Triggers deployment on push to the main branch
+  workflow_dispatch: # Allows manual triggering from the Actions tab
 
 env:
   UV_VERSION: 0.6
